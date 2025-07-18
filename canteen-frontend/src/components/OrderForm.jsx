@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { QRCode } from "qrcode.react";
 
 export default function OrderForm({onOrderPlaced}) {
   const [roll, setRoll] = useState("");
   const [menu, setMenu] = useState([]);
   const [selectedItems, setSelectedItems] = useState({});
+  const [orderInfo, setOrderInfo] = useState(null);
 
   useEffect(() => {
     axios
@@ -63,7 +65,7 @@ export default function OrderForm({onOrderPlaced}) {
 
       {Array.isArray(menu) ? (
         menu.map((item, index) => (
-          <div key={index} className="flex items-center justify-between mb-2">
+          <div key={index} className="form-div">
             <span>
               {item.name} (₹{item.price})
             </span>
@@ -84,7 +86,6 @@ export default function OrderForm({onOrderPlaced}) {
 
       <button
         type="submit"
-        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
       >
         Submit Order
       </button>
