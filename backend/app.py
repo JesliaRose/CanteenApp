@@ -76,7 +76,15 @@ def add_menu_item(id, name, price, qty):
 @app.route('/menu')
 def get_menu():
     items = MenuItem.query.all()
-    return {'menu': [{ 'name': i.name, 'price': i.price, 'qty': i.available_quantity } for i in items]}
+    return jsonify([
+{
+            "id": item.id,  # ✅ add this!
+            "name": item.name,
+            "price": item.price,
+            "available_quantity": item.available_quantity
+        }
+        for item in items
+    ])
 
 """ @app.route('/order/<roll>/<int:item_id>/<int:qty>')
 def place_order(roll, item_id, qty):
@@ -103,29 +111,47 @@ def place_order(roll, item_id, qty):
 
     return {"message": f"{student.name} ordered {qty}x {item.name}"} """
 
+
 @app.route('/place_order', methods=['POST'])
 def place_order():
     data = request.get_json()
-    roll = data['roll']
-    items = data['items']  # list of { item_id, qty }
+    print("Received order data:", data)
+
+    roll = data.get('roll')
+    items = data.get('items')
+
+    if not roll or not isinstance(items, list):
+        return jsonify({'error': 'Invalid order format'}), 400
 
     student = Student.query.filter_by(roll_number=roll).first()
     if not student:
-        return {"error": "Student not found"}, 404
+        return jsonify({'error': 'Student not found'}), 404
 
-    for entry in items:
-        item = MenuItem.query.get(entry['item_id'])
-        if item is None:
-            return {"error": f"Item ID {entry['item_id']} not found"}, 400
-        if item.available_quantity < entry['qty']:
-            return {"error": f"Not enough stock for {item.name}"}, 400
+    for item in items:
+        try:
+            item_id = int(item.get('item_id'))
+            qty = int(item.get('qty'))
+        except (TypeError, ValueError):
+            return jsonify({'error': 'Invalid item format'}), 400
 
-        item.available_quantity -= entry['qty']
-        order = Order(student_id=student.id, menu_item_id=item.id, quantity=entry['qty'])
+        if qty <= 0:
+            continue  # skip zero or negative quantities
+
+        menu_item = MenuItem.query.get(item_id)
+        if not menu_item:
+            return jsonify({'error': f'Item ID {item_id} not found'}), 404
+
+        if qty > menu_item.available_quantity:
+            return jsonify({'error': f'Not enough quantity for {menu_item.name}'}), 400
+
+        order = Order(student_id=student.id, item_id=item_id, quantity=qty)
         db.session.add(order)
 
+        menu_item.available_quantity -= qty  # reduce stock
+
     db.session.commit()
-    return {"message": "Order placed successfully!"}
+    return jsonify({'message': 'Order placed successfully'})
+
 
 
 
