@@ -1,8 +1,9 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+CORS(app)
 # PostgreSQL connection string
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://canteen_user:canteen123@localhost/canteen'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -77,7 +78,7 @@ def get_menu():
     items = MenuItem.query.all()
     return {'menu': [{ 'name': i.name, 'price': i.price, 'qty': i.available_quantity } for i in items]}
 
-@app.route('/order/<roll>/<int:item_id>/<int:qty>')
+""" @app.route('/order/<roll>/<int:item_id>/<int:qty>')
 def place_order(roll, item_id, qty):
     # 1. Check student
     student = Student.query.filter_by(roll_number=roll).first()
@@ -100,7 +101,32 @@ def place_order(roll, item_id, qty):
     db.session.add(order)
     db.session.commit()
 
-    return {"message": f"{student.name} ordered {qty}x {item.name}"}
+    return {"message": f"{student.name} ordered {qty}x {item.name}"} """
+
+@app.route('/place_order', methods=['POST'])
+def place_order():
+    data = request.get_json()
+    roll = data['roll']
+    items = data['items']  # list of { item_id, qty }
+
+    student = Student.query.filter_by(roll_number=roll).first()
+    if not student:
+        return {"error": "Student not found"}, 404
+
+    for entry in items:
+        item = MenuItem.query.get(entry['item_id'])
+        if item is None:
+            return {"error": f"Item ID {entry['item_id']} not found"}, 400
+        if item.available_quantity < entry['qty']:
+            return {"error": f"Not enough stock for {item.name}"}, 400
+
+        item.available_quantity -= entry['qty']
+        order = Order(student_id=student.id, menu_item_id=item.id, quantity=entry['qty'])
+        db.session.add(order)
+
+    db.session.commit()
+    return {"message": "Order placed successfully!"}
+
 
 
 @app.route('/orders_today')
