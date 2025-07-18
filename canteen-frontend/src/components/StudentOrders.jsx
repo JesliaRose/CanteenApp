@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import "./styles.css";
 
 const StudentOrders = () => {
   const [roll, setRoll] = useState('');
@@ -28,7 +29,7 @@ const StudentOrders = () => {
       {student && (
         <div>
           <h3>Orders by {student}:</h3>
-          <ul>
+          <ul className='no-bullets'>
             {orders.map((o, i) => (
               <li key={i}>{o.item}: {o.quantity}</li>
             ))}

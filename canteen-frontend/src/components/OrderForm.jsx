@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function OrderForm() {
+export default function OrderForm({onOrderPlaced}) {
   const [roll, setRoll] = useState("");
   const [menu, setMenu] = useState([]);
   const [selectedItems, setSelectedItems] = useState({});
@@ -39,6 +39,7 @@ export default function OrderForm() {
       );
       alert(res.data.message);
       setSelectedItems({});
+       if (onOrderPlaced) onOrderPlaced();
     } catch (err) {
       alert(err.response?.data?.error || "Order failed");
     }
