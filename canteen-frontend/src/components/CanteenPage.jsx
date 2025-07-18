@@ -7,7 +7,6 @@ const CanteenPage = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleOrderPlaced = () => {
-    // Increment trigger to notify OrdersToday to refetch
     setRefreshTrigger(prev => prev + 1);
   };
 
