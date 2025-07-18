@@ -5,3 +5,14 @@
 .form-div{
     padding: 10px;
 }
+
+.role-btn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.menu-items{
+    padding: 10px;
+}

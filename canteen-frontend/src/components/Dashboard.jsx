@@ -3,6 +3,7 @@ import OrderForm from "./OrderForm";
 import OrdersToday from "./OrdersToday";
 import StockStatus from "./StockStatus";
 import StudentOrders from "./StudentOrders";
+import "./styles.css";
 
 export default function Dashboard() {
   const [role, setRole] = useState("student");
@@ -13,20 +14,14 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
-      <div className="flex justify-center mb-4">
+    <div>
+      <div className="role-btn">
         <button
-          className={`px-4 py-2 mx-2 rounded ${
-            role === "student" ? "bg-blue-600 text-white" : "bg-gray-200"
-          }`}
           onClick={() => setRole("student")}
         >
           Student
         </button>
         <button
-          className={`px-4 py-2 mx-2 rounded ${
-            role === "staff" ? "bg-blue-600 text-white" : "bg-gray-200"
-          }`}
           onClick={() => setRole("staff")}
         >
           Canteen Staff

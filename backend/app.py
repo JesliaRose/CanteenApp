@@ -153,8 +153,6 @@ def place_order():
     return jsonify({'message': 'Order placed successfully'})
 
 
-
-
 @app.route('/orders_today')
 def orders_today():
     results = db.session.query(
